@@ -33,11 +33,18 @@ const Input = styled.input`
     }
 `;
 
+const Error = styled.span`
+    padding: 10px 20px;
+    font-weight: 600;
+    color: tomato;
+`;
+
 export default function CreateAccounte() {
     const [isLoading, setLoading] = useState(false);
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { target: { name, value } } = e;
@@ -64,6 +71,7 @@ export default function CreateAccounte() {
             // redirect to the home page
         } catch (e) {
             // setError
+            setError("Error!");
         }
         finally {
             setLoading(false);
@@ -79,6 +87,7 @@ export default function CreateAccounte() {
                 <Input onChange={onChange} name="password" value={password} placeholder="Password" type="password" required />
                 <Input type="submit" value={isLoading ? "Loading..." : "Create Account"} />
             </Form>
+            {error !== "" ? <Error>{error}</Error> : null}
         </Wrapper>
     );
 }
