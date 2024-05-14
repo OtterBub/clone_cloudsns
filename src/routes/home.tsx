@@ -7,6 +7,7 @@ export default function Home() {
 
     return (
         <h1>
+            This is main Home<br/>
             <button onClick={logOut}>Logout</button>
         </h1>
     );
