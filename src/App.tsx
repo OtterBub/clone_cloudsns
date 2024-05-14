@@ -3,7 +3,7 @@ import Layout from "./components/layout";
 import Home from "./routes/home";
 import Profile from "./routes/profiles";
 import Login from "./routes/login";
-import CreateAccounte from "./routes/create-account";
+import CreateAccount from "./routes/create-account";
 import styled, { createGlobalStyle } from "styled-components";
 import reset from "styled-reset";
 import { useEffect, useState } from "react";
@@ -38,7 +38,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/create-account",
-    element: <CreateAccounte />
+    element: <CreateAccount />
   },
   // 404 page
   {
