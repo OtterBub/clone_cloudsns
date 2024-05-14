@@ -9,12 +9,17 @@ import reset from "styled-reset";
 import { useEffect, useState } from "react";
 import LoadingScreen from "./routes/loading-screen";
 import { auth } from "./firebase";
+import ProtectedRoute from "./components/protected-route";
 
 const router = createBrowserRouter([
   // home page
   {
     path: "/",
-    element: <Layout />,
+    element: (
+      <ProtectedRoute>
+        <Layout />,
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: "",
