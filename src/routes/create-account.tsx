@@ -3,6 +3,11 @@ import { useState } from "react";
 import { styled } from "styled-components";
 import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
+import { FirebaseError } from "firebase/app";
+
+// const errors = {
+//     "auth/email-already-in-use": "That email already exists."
+// };
 
 const Title = styled.h1`
     font-size: 42px;
@@ -69,7 +74,8 @@ export default function CreateAccounte() {
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if(isLoading ||  name === "" || email === "" || password === "") return;
+        setError("");
+        if (isLoading || name === "" || email === "" || password === "") return;
         try {
             // change the loading state to true
             setLoading(true);
@@ -85,8 +91,13 @@ export default function CreateAccounte() {
             navigate("/");
 
         } catch (e) {
-            // setError
-            setError("Error!");
+            // Error
+            // console.log(e);
+            if (e instanceof FirebaseError) {
+                setError(e.message);
+            } else {
+                setError("Unkown Error!");
+            }
         }
         finally {
             setLoading(false);
