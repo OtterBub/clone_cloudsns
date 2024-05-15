@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import LoadingScreen from "./components/loading-screen";
 import { auth } from "./firebase";
 import ProtectedRoute from "./components/protected-route";
+import ResetPassword from "./routes/reset-password";
 
 const router = createBrowserRouter([
   // home page
@@ -39,6 +40,10 @@ const router = createBrowserRouter([
   {
     path: "/create-account",
     element: <CreateAccount />
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />
   },
   // 404 page
   {

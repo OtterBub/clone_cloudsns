@@ -1,21 +1,37 @@
-import { sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
-import { useState } from "react";
+import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail, sendPasswordResetEmail, updateProfile } from "firebase/auth";
+import { useEffect, useState } from "react";
 import { auth } from "../firebase";
 import { Link, useNavigate } from "react-router-dom";
 import { FirebaseError } from "firebase/app";
 import { Wrapper, Title, Form, Input, Switcher, Error } from "../components/auth-components";
 import GithubButton from "../components/github-btn";
+import Timer from "../util/timer";
 
 // const errors = {
 //     "auth/email-already-in-use": "That email already exists."
 // };
 
-export default function Login() {
-    const navigate = useNavigate();
+
+export default function ResetPassword() {
     const [isLoading, setLoading] = useState(false);
+    const [seconds, setSeconds] = useState(0);
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+
+    useEffect(() => {
+        let interval: NodeJS.Timeout | null = null;
+
+        if (seconds === 0) {
+            // Timer has expired
+            clearInterval(interval!);
+        } else {
+            interval = setInterval(() => {
+                console.log("timer");
+                setSeconds(seconds - 1);
+            }, 1000);
+        }
+        return () => clearInterval(interval!);
+    }, [seconds]);
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { target: { name, value } } = e;
@@ -23,30 +39,21 @@ export default function Login() {
             case "email":
                 setEmail(value);
                 break;
-            case "password":
-                setPassword(value);
-                break;
             default:
                 break;
         }
     };
 
-    const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const onReset = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError("");
-        if (isLoading || email === "" || password === "") return;
+        if (isLoading || email === "") return;
         try {
-            // change the loading state to true
             setLoading(true);
 
-            // Create an account
-            const credentials = await signInWithEmailAndPassword(auth, email, password);
-            console.log(credentials.user);
+            await sendPasswordResetEmail(auth, email)
 
-
-            // redirect to the home page
-            navigate("/");
-
+            setSeconds(10);
         } catch (e) {
             // Error
             // console.log(e);
@@ -61,23 +68,21 @@ export default function Login() {
         }
     };
 
-
     return (
         <Wrapper>
-            <Title>Login ☁</Title>
-            <Form onSubmit={onSubmit}>
+            <Title>Reset Password ☁</Title>
+            <Form onSubmit={onReset}>
                 <Input onChange={onChange} name="email" value={email} placeholder="Email" type="email" required />
-                <Input onChange={onChange} name="password" value={password} placeholder="Password" type="password" required />
-                <Input type="submit" value={isLoading ? "Loading..." : "Login"} />
+                <Input
+                    disabled={email.length < 1 || seconds > 0}
+                    type="submit"
+                    value={`${isLoading ? "Loading..." : (seconds > 0) ? `Wating... ${seconds}` : "Reset Password"} `}
+                />
             </Form>
             {error !== "" ? <Error>{error}</Error> : null}
             <Switcher>
-                Don't have an account? {" "}
-                <Link to="/create-account">Create one &rarr;</Link>
-            </Switcher>
-            <Switcher>
-                Forgot your password? {" "}
-                <Link to="/reset-password">Reset Your Password &rarr;</Link>
+                Already have an account? {" "}
+                <Link to="/Login">Log in &rarr;</Link>
             </Switcher>
             <GithubButton />
         </Wrapper>
