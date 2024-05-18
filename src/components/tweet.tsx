@@ -20,6 +20,7 @@ const Photo = styled.img`
     width: 100px;
     height: 100px;
     border-radius: 15px;
+    margin: 10px;
 `;
 
 const Username = styled.span`
@@ -29,9 +30,10 @@ const Username = styled.span`
 const Payload = styled.p`
     margin:  10px 0px;
     font-size: 18px;
+    word-break: break-all;
 `;
 
-const DeleteButton = styled.button`
+const RedButton = styled.button`
     background-color: tomato;
     color: white;
     font-weight: 600;
@@ -43,7 +45,7 @@ const DeleteButton = styled.button`
     cursor: pointer;
 `;
 
-const EditButton = styled.button`
+const BlueButton = styled.button`
     background-color: #007bff;
     color: white;
     font-weight: 600;
@@ -131,19 +133,17 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
     if (isEdit) {
         return (
             <Wrapper>
-                {
-                    <Column>
-                        <Username>{username}</Username>
-                        <TextArea
-                            rows={5}
-                            maxLength={180}
-                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => { setEditTweet(e.target.value); }}
-                            value={editTweet}
-                        />
-                        {user?.uid === userId ? <RedButton onClick={onEditCancle}>Cancle</RedButton> : null}
-                        {user?.uid === userId ? <BlueButton onClick={onEditSave}>Save</BlueButton> : null}
-                    </Column>
-                }
+                <Column>
+                    <Username>{username}</Username>
+                    <TextArea
+                        rows={5}
+                        maxLength={180}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => { setEditTweet(e.target.value); }}
+                        value={editTweet}
+                    />
+                    {user?.uid === userId ? <RedButton onClick={onEditCancle}>Cancle</RedButton> : null}
+                    {user?.uid === userId ? <BlueButton onClick={onEditSave}>Save</BlueButton> : null}
+                </Column>
                 {photo !== undefined ?
                     <Column>
                         <Photo src={photo} />
@@ -153,14 +153,12 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
     } else {
         return (
             <Wrapper>
-                {
-                    <Column>
-                        <Username>{username}</Username>
-                        <Payload>{tweet}</Payload>
-                        {user?.uid === userId ? <RedButton onClick={onDelete}>Delete</RedButton> : null}
-                        {user?.uid === userId ? <BlueButton onClick={onEdit}>Edit</BlueButton> : null}
-                    </Column>
-                }
+                <Column>
+                    <Username>{username}</Username>
+                    <Payload>{tweet}</Payload>
+                    {user?.uid === userId ? <RedButton onClick={onDelete}>Delete</RedButton> : null}
+                    {user?.uid === userId ? <BlueButton onClick={onEdit}>Edit</BlueButton> : null}
+                </Column>
                 {photo !== undefined ?
                     <Column>
                         <Photo src={photo} />

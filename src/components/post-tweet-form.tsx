@@ -8,6 +8,7 @@ const Form = styled.form`
     display: flex;
     flex-direction: column;
     gap: 10px;
+    margin-bottom: 10px;
 `;
 
 const TextArea = styled.textarea`
@@ -113,8 +114,7 @@ export default function PostTweetForm() {
 
     return (
         <Form onSubmit={onSubmit}>
-            <
-                TextArea
+            <TextArea
                 rows={5}
                 maxLength={180}
                 onChange={onChange}
