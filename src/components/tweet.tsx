@@ -1,8 +1,9 @@
 import styled from "styled-components";
 import { ITweet } from "./timeline";
 import { auth, db, storage } from "../firebase";
-import { deleteDoc, doc } from "firebase/firestore";
+import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
+import { useState } from "react";
 
 const Wrapper = styled.div`
     display: grid;
@@ -54,8 +55,30 @@ const EditButton = styled.button`
     cursor: pointer;
 `;
 
+const TextArea = styled.textarea`
+    border: 2px solid white;
+    padding: 20px;
+    border-radius: 20px;
+    font-size: 16px;
+    color: white;
+    background-color: black;
+    width: 100%;
+    resize: none;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    &::placeholder {
+        font-size: 16px;
+    }
+    &:focus {
+        outline: none;
+        border-color: #1d9bf0;
+    }
+`;
+
 export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
     const user = auth.currentUser;
+    const [isEdit, setEdit] = useState(false);
+    const [editTweet, setEditTweet] = useState("");
+
     const onDelete = async () => {
         const ok = confirm("Are you sure you want to delete this tweet?")
         if (!ok || user?.uid !== userId) return;
@@ -75,41 +98,76 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
     }
 
     const onEdit = async () => {
-        const ok = confirm("Are you sure you want to delete this tweet?")
-        if (!ok || user?.uid !== userId) return;
-        try {
+        if (user?.uid !== userId) return;
+        setEdit(true);
+        setEditTweet(tweet);
+    }
 
-            await deleteDoc(doc(db, "tweets", id));
-            if (photo) {
-                const photoRef = ref(storage, `tweets/${user.uid}/${id}`)
-                await deleteObject(photoRef);
-            }
-            console.log("Tweet deleted");
+    const onEditSave = async () => {
+        if (user?.uid !== userId) return;
+        try {
+            updateDoc(doc(db, "tweets", id), {
+                tweet: editTweet
+            });
+
+            // if (photo) {
+            //     const photoRef = ref(storage, `tweets/${user.uid}/${id}`)
+            //     await deleteObject(photoRef);
+            // }
 
         } catch (e) {
             console.error(e);
         } finally {
-
+            setEdit(false);
+            setEditTweet("");
         }
     }
-    console.log(`photo ${photo}`);
-    return (
-        <Wrapper>
-            {
-                <Column>
-                    <Username>{username}</Username>
-                    <Payload>{tweet}</Payload>
-                    {user?.uid === userId ? <DeleteButton onClick={onDelete}>Delete</DeleteButton> : null}
-                    {user?.uid === userId ? <EditButton onClick={onEdit}>Edit</EditButton> : null}
-                </Column>
-            }
-            {photo !== undefined ?
-                <Column>
-                    <Photo src={photo} />
-                </Column> : null}
-        </Wrapper>
-    );
 
+    const onEditCancle = async () => {
+        setEdit(false);
+        setEditTweet("");
+    }
+    console.log(`photo ${photo}`);
+    if (isEdit) {
+        return (
+            <Wrapper>
+                {
+                    <Column>
+                        <Username>{username}</Username>
+                        <TextArea
+                            rows={5}
+                            maxLength={180}
+                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => { setEditTweet(e.target.value); }}
+                            value={editTweet}
+                        />
+                        {user?.uid === userId ? <RedButton onClick={onEditCancle}>Cancle</RedButton> : null}
+                        {user?.uid === userId ? <BlueButton onClick={onEditSave}>Save</BlueButton> : null}
+                    </Column>
+                }
+                {photo !== undefined ?
+                    <Column>
+                        <Photo src={photo} />
+                    </Column> : null}
+            </Wrapper>
+        );
+    } else {
+        return (
+            <Wrapper>
+                {
+                    <Column>
+                        <Username>{username}</Username>
+                        <Payload>{tweet}</Payload>
+                        {user?.uid === userId ? <RedButton onClick={onDelete}>Delete</RedButton> : null}
+                        {user?.uid === userId ? <BlueButton onClick={onEdit}>Edit</BlueButton> : null}
+                    </Column>
+                }
+                {photo !== undefined ?
+                    <Column>
+                        <Photo src={photo} />
+                    </Column> : null}
+            </Wrapper>
+        );
+    }
 
 
 }
