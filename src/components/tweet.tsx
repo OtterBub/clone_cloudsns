@@ -42,6 +42,18 @@ const DeleteButton = styled.button`
     cursor: pointer;
 `;
 
+const EditButton = styled.button`
+    background-color: #007bff;
+    color: white;
+    font-weight: 600;
+    border: 0;
+    font-size: 12px;
+    padding: 5px 10px;
+    text-transform: uppercase;
+    border-radius: 5px;
+    cursor: pointer;
+`;
+
 export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
     const user = auth.currentUser;
     const onDelete = async () => {
@@ -61,16 +73,40 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
 
         }
     }
+
+    const onEdit = async () => {
+        const ok = confirm("Are you sure you want to delete this tweet?")
+        if (!ok || user?.uid !== userId) return;
+        try {
+
+            await deleteDoc(doc(db, "tweets", id));
+            if (photo) {
+                const photoRef = ref(storage, `tweets/${user.uid}/${id}`)
+                await deleteObject(photoRef);
+            }
+            console.log("Tweet deleted");
+
+        } catch (e) {
+            console.error(e);
+        } finally {
+
+        }
+    }
+    console.log(`photo ${photo}`);
     return (
         <Wrapper>
-            <Column>
-                <Username>{username}</Username>
-                <Payload>{tweet}</Payload>
-                {user?.uid === userId ? <DeleteButton onClick={onDelete}>Delete</DeleteButton> : null}
-            </Column>
-            {Photo ? <Column>
-                <Photo src={photo} />
-            </Column> : null}
+            {
+                <Column>
+                    <Username>{username}</Username>
+                    <Payload>{tweet}</Payload>
+                    {user?.uid === userId ? <DeleteButton onClick={onDelete}>Delete</DeleteButton> : null}
+                    {user?.uid === userId ? <EditButton onClick={onEdit}>Edit</EditButton> : null}
+                </Column>
+            }
+            {photo !== undefined ?
+                <Column>
+                    <Photo src={photo} />
+                </Column> : null}
         </Wrapper>
     );
 
