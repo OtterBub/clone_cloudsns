@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { ITweet } from "./timeline";
 import { auth, db, storage } from "../firebase";
 import { deleteDoc, doc, updateDoc } from "firebase/firestore";
-import { deleteObject, ref } from "firebase/storage";
+import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useState } from "react";
 
 const Wrapper = styled.div`
@@ -13,7 +13,7 @@ const Wrapper = styled.div`
     border-radius: 15px;
 `;
 const Column = styled.div`
-
+    align-content: center;
 `;
 
 const Photo = styled.img`
@@ -21,6 +21,15 @@ const Photo = styled.img`
     height: 100px;
     border-radius: 15px;
     margin: 10px;
+    outline-style: solid;
+`;
+
+const NonePhoto = styled.div`
+    width: 100px;
+    height: 100px;
+    border-radius: 15px;
+    margin: 10px;
+    outline-style: solid;
 `;
 
 const Username = styled.span`
@@ -42,7 +51,11 @@ const RedButton = styled.button`
     padding: 5px 10px;
     text-transform: uppercase;
     border-radius: 5px;
+    margin: 2px;
     cursor: pointer;
+    &:hover {
+        opacity: 0.8;
+    }
 `;
 
 const BlueButton = styled.button`
@@ -54,7 +67,11 @@ const BlueButton = styled.button`
     padding: 5px 10px;
     text-transform: uppercase;
     border-radius: 5px;
+    margin: 2px;
     cursor: pointer;
+    &:hover {
+        opacity: 0.8;
+    }
 `;
 
 const TextArea = styled.textarea`
@@ -78,8 +95,10 @@ const TextArea = styled.textarea`
 
 export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
     const user = auth.currentUser;
-    const [isEdit, setEdit] = useState(false);
+    const [isEditMode, setEdit] = useState(false);
     const [editTweet, setEditTweet] = useState("");
+    const [isEditPhoto, setIsEditPhoto] = useState(false);
+    const [editPhoto, setEditPhoto] = useState<File | null>(null);
 
     const onDelete = async () => {
         const ok = confirm("Are you sure you want to delete this tweet?")
@@ -112,9 +131,23 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
                 tweet: editTweet
             });
 
-            // if (photo) {
+            // TODO: Edit Photo
+            // if (editPhoto instanceof File) {
             //     const photoRef = ref(storage, `tweets/${user.uid}/${id}`)
             //     await deleteObject(photoRef);
+            //     const uploadResult = await uploadBytes(photoRef, editPhoto);
+            //     const uploadUrl = await getDownloadURL(uploadResult.ref);
+            //     await updateDoc(doc(db, "twwets", id), {
+            //         photo: uploadUrl
+            //     });
+            // }
+            // // Delete only photo
+            // else if (photo !== undefined || isEditPhoto) {
+            //     const photoRef = ref(storage, `tweets/${user.uid}/${id}`)
+            //     await deleteObject(photoRef);
+            //     await updateDoc(doc(db, "twwets", id), {
+            //         photo: null
+            //     });
             // }
 
         } catch (e) {
@@ -129,8 +162,9 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
         setEdit(false);
         setEditTweet("");
     }
-    console.log(`photo ${photo}`);
-    if (isEdit) {
+
+    // Edit View
+    if (isEditMode) {
         return (
             <Wrapper>
                 <Column>
@@ -144,13 +178,21 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
                     {user?.uid === userId ? <RedButton onClick={onEditCancle}>Cancle</RedButton> : null}
                     {user?.uid === userId ? <BlueButton onClick={onEditSave}>Save</BlueButton> : null}
                 </Column>
-                {photo !== undefined ?
-                    <Column>
-                        <Photo src={photo} />
-                    </Column> : null}
+                <Column>
+                    {photo !== undefined ? <Photo src={photo} /> :
+                        <NonePhoto>
+                            <svg fill="none" strokeWidth={1.5} stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                        </NonePhoto>
+                    }
+
+                </Column>
             </Wrapper>
         );
-    } else {
+    }
+    // Normal View
+    else {
         return (
             <Wrapper>
                 <Column>
